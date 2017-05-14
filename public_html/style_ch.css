@@ -1,0 +1,38 @@
+.ch-title-body {
+    background: linear-gradient(to right, #3770d7 , #a6b1c1);
+    background-color: #3770d7;
+}
+
+.ch-title {
+    color: white;
+    transform: translate(10px);
+    animation: chSportTitleAnimation 1s 1 ease-out;
+}
+
+.ch-desc {
+    color: white;
+    font-size: 20px;
+    transform: translate(10px);
+    animation: chSportTitleAnimation 2s 1 ease-out;
+}
+
+.ch-panel {
+    margin: 0px;
+    opacity: 0;
+    animation: chSportPanelFadeInAnimation 1s forwards 1;
+}
+
+.ch-specs-item {
+    opacity: 0;
+    animation: chSportPanelFadeInAnimation 0.75s forwards 1;
+}
+
+@keyframes chSportPanelFadeInAnimation {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes chSportTitleAnimation {
+    from { transform: translate(40px); }
+    to   { transform: translate(10px); }
+}

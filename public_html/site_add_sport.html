@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+    <head>
+<script>
+    var post = "";
+    var post_sp_save = "sport/save";
+
+    var r_sp_save = new XMLHttpRequest();
+
+    function read_IP() {
+        var cookies = document.cookie;
+        var idx = cookies.indexOf("restip=");
+        if (idx > -1) {
+            var ip = "";
+            var cookiesraw = cookies.split(';');
+            for (i in cookiesraw) {
+                var data = cookiesraw[i].split('=');
+                if (data[0] == "restip") {
+                    ip = data[1];
+                    break;
+                }
+            }
+            post = "http://" + ip + ":8080/sport/rest/";
+        } else {
+            var ip = prompt("Írd be a REST API IP címét (port nélkül): ", '');
+            var error = false;
+            var segments = ip.split(".");
+
+            var chksum = 0;
+            for (i in segments) { chksum += parseInt(segments[i]); }
+            if (chksum !== 704) { error = true; }
+
+            if (error === false) {
+                document.cookie = "restip=" + ip;
+                post = "http://" + ip + ":8080/sport/rest/";
+            } else {
+                readIP();
+            }
+        }
+    }
+
+    function rPost_sp_save() {
+        var form = document.getElementById("sport-add-form");
+        form.name.value = "";
+        form.description.value = "";
+        var msg = JSON.parse(r_sp_save.responseText);
+        window.alert("Új sport felvétele:\n " + msg.message);
+    }
+    
+    function makeBaseAuth(usern, passwd) {
+      var temp = usern + ':' + passwd;
+      var hash = btoa(temp);
+      return "Basic " + hash;
+    }
+    
+    function onSaveSport() {
+        var form = document.getElementById("sport-add-form");
+        var cookies = document.cookie;
+        
+        if (form.name.value == "") {
+            window.alert("Hiba: Nem adtál meg nevet a sportágnak!");
+            return false;
+        }
+        if (form.description.value == "") {
+            window.alert("Hiba: Nem adtál meg leírást a sportágnak!");
+            return false;
+        }
+        var params = '{ "name": "' + form.name.value + '", "description": "' + form.description.value + '" }';
+        read_IP();
+        
+        var username;
+        var cookiesraw = cookies.split('; ');
+        for (i in cookiesraw) {
+            var data = cookiesraw[i].split('=');
+            if (data[0] == "usern") {
+                username = data[1];
+                break;
+            }
+        }
+        var passwd;
+        for (i in cookiesraw) {
+            var data = cookiesraw[i].split('=');
+            if (data[0] == "passwd") {
+                passwd = data[1];
+                break;
+            }
+        }
+        
+        r_sp_save.open('POST', post + post_sp_save, true);
+        r_sp_save.setRequestHeader("Content-type", 'application/json; charset=UTF-8');
+        
+        var auth = makeBaseAuth(username, passwd);
+        r_sp_save.setRequestHeader('Authorization', auth);
+        
+        r_sp_save.withCredentials = false;
+        
+        r_sp_save.addEventListener('load', rPost_sp_save);
+        r_sp_save.send(params);
+        
+        return false;
+    }
+</script>
+        <title>SportOnline</title>
+        <link rel="icon" href="favicon.ico" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- JS -->
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script>
+            $(function () {
+                $("#headercontent").load("header.html");
+                $("#footercontent").load("footer.html");
+            });
+        </script>
+        <!-- BOOTSRAP -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <!-- HEADER -->
+        <div id="headercontent"></div>
+        <!-- BODY -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <ol class="breadcrumb" id="breadcrumbs">
+                    <li><a href="index.html">Kezdőlap</a></li>
+                    <li class="active">Új sport felvétele</li>
+                </ol>
+            </div>
+            <div class="panel-body title-body">
+                <h3 class="title">Új sport felvétele</h3>
+            </div>
+            <div class="panel-body form-add-bg">
+                <!-- BODY CONTENT -->
+                <div class="form-group form-add-group">
+                    <form id="sport-add-form">
+                        <label for="usr">Sport megnevezése:</label>
+                        <input type="text" class="form-control form-add" name='name' placeholder="pl.: asztalitenisz"><br>
+                        <label for="usr">Leírás:</label>
+                        <input type="text" class="form-control form-add" name='description' placeholder="további információ"><br>
+                    </form>
+                    <button type="submit" class="btn btn-success btn-add" onclick="onSaveSport()">Hozzáad</button>
+                </div>
+            </div>
+            <!-- FOOTER -->
+            <div id="footercontent"></div>
+        </div>
+    </body>
+</html>

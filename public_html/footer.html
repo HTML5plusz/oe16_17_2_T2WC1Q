@@ -1,0 +1,12 @@
+<script>
+    function OnClearCookie() {
+        document.cookie = 'restip=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = 'usern=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = 'passwd=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        window.alert("Cookie törölve. Frissítsd az oldalt!");
+    }
+    
+</script>
+<div class="panel-footer">
+    <button type="button" class="btn btn-danger" onclick="OnClearCookie()">Clear REST IP Cookie</button>
+</div>

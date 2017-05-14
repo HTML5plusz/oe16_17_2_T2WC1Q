@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+    <head>
+<script>
+    var get = "";
+    var post_ch_save = "championship/save";
+    var get_se_idname = "seria/idname/all";
+    var get_ss_idname = "season/idname/all";
+    
+    var r_ch_save = new XMLHttpRequest();
+    var r_se_idname = new XMLHttpRequest();
+    var r_ss_idname = new XMLHttpRequest();
+    
+    function readIP() {
+        var cookies = document.cookie;
+        var idx = cookies.indexOf("restip=");
+        if (idx > -1) {
+            var ip = "";
+            var cookiesraw = cookies.split(';');
+            for (i in cookiesraw) {
+                var data = cookiesraw[i].split('=');
+                if (data[0] == "restip") {
+                    ip = data[1];
+                    break;
+                }
+            }
+            get = "http://" + ip + ":8080/sport/rest/";
+        } else {
+            var ip = prompt("Írd be a REST API IP címét (port nélkül): ", '');
+            var error = false;
+            var segments = ip.split(".");
+
+            var chksum = 0;
+            for (i in segments) { chksum += parseInt(segments[i]); }
+            if (chksum !== 704) { error = true; }
+
+            if (error === false) {
+                document.cookie = "restip=" + ip;
+                get = "http://" + ip + ":8080/sport/rest/";
+            } else {
+                readIP();
+            }
+        }
+    }
+    
+    function rGet_se_get() {
+        var se_all = JSON.parse(r_se_idname.responseText);
+        var form = document.getElementById("se-radios");
+        form.innerHTML = '<label for="usr">Bajnokság típusa (széria):</label>';
+        
+        for (var i = 0; i < se_all.length; i++) {
+            form.innerHTML += "\n" + '<div class="radio"><label><input type="radio" name="se" class="custom-control-input" value="' + se_all[i].id + '">' + se_all[i].name + '</label></div>'
+        }
+    }
+    
+    function rGet_ss_get() {
+        var ss_all = JSON.parse(r_ss_idname.responseText);
+        var form = document.getElementById("ss-radios");
+        form.innerHTML = '<label for="usr">Szezon:</label>';
+        
+        for (var i = 0; i < ss_all.length; i++) {
+            form.innerHTML += "\n" + '<div class="radio"><label><input type="radio" name="ss" class="custom-control-input" value="' + ss_all[i].id + '">' + ss_all[i].name + '</label></div>'
+        }
+    }
+    
+    window.onload = function() {
+        readIP();
+        
+        r_se_idname.addEventListener('load', rGet_se_get);
+        r_se_idname.open("GET", get + get_se_idname, true);
+        r_se_idname.send();
+        
+        r_ss_idname.addEventListener('load', rGet_ss_get);
+        r_ss_idname.open("GET", get + get_ss_idname, true);
+        r_ss_idname.send();
+    };
+
+    function rPost_ch_save() {
+        var form = document.getElementById("sport-add-form");
+        form.name.value = "";
+        form.description.value = "";
+        
+        var se_radios = document.getElementsByName("se");
+        for (var i = 0; i < se_radios.length; i++) {
+            se_radios[i].checked = false;
+            se_radios[i].disabled = false;
+        }
+        
+        var ss_radios = document.getElementsByName("ss");
+        for (var i = 0; i < ss_radios.length; i++) {
+            ss_radios[i].checked = false;
+            ss_radios[i].disabled = false;
+        }
+        
+        var msg = JSON.parse(r_ch_save.responseText);
+        window.alert("Új bajnokság felvétele:\n " + msg.message);
+    }
+
+    function makeBaseAuth(usern, passwd) {
+      var temp = usern + ':' + passwd;
+      var hash = btoa(temp);
+      return "Basic " + hash;
+    }
+    
+    function onSaveChampionship() {
+        var form = document.getElementById("sport-add-form");
+        var cookies = document.cookie;
+        
+        if (form.name.value == "") {
+            window.alert("Hiba: Nem adtál meg nevet a bajnokságnak!");
+            return false;
+        }
+        if (form.description.value == "") {
+            window.alert("Hiba: Nem adtál meg leírást a bajnokságnak!");
+            return false;
+        }
+        if (form.startDate.value == "") {
+            window.alert("Hiba: Nem adtál meg kezdeti dátumot a bajnokságnak!");
+            return false;
+        }
+        if (form.endDate.value == "") {
+            window.alert("Hiba: Nem adtál meg befejezési dátumot a bajnokságnak!");
+            return false;
+        }
+        
+        var username;
+        var cookiesraw = cookies.split('; ');
+        for (i in cookiesraw) {
+            var data = cookiesraw[i].split('=');
+            if (data[0] == "usern") {
+                username = data[1];
+                break;
+            }
+        }
+        var passwd;
+        for (i in cookiesraw) {
+            var data = cookiesraw[i].split('=');
+            if (data[0] == "passwd") {
+                passwd = data[1];
+                break;
+            }
+        }
+        var auth = makeBaseAuth(username, passwd);
+        
+        var params = '{ "name": "' + form.name.value + '", "description": "' + form.description.value + '", "startDate": "' + form.startDate.value + '", "endDate": "' + form.endDate.value + '", ';
+        var seriaid = -1;
+        var se_radios = document.getElementsByName("se");
+        for (var i = 0; i < se_radios.length; i++)
+            if (se_radios[i].checked)
+                seriaid = se_radios[i].value;
+        
+        var seasonid = -1;
+        var ss_radios = document.getElementsByName("ss");
+        for (var i = 0; i < ss_radios.length; i++)
+            if (ss_radios[i].checked)
+                seasonid = ss_radios[i].value;
+        
+        readIP();
+        params += '"seasonid": ' + seasonid + ', "seriaid": '+ seriaid + ', "conditionid": [0] }';
+        
+        r_ch_save.open('POST', get + post_ch_save, true);
+        r_ch_save.setRequestHeader("Content-type", 'application/json; charset=UTF-8');
+        r_ch_save.setRequestHeader('Authorization', auth);
+        r_ch_save.withCredentials = false;
+        r_ch_save.addEventListener('load', rPost_ch_save);
+        r_ch_save.send(params);
+        
+        return false;
+    }
+</script>
+        <title>SportOnline</title>
+        <link rel="icon" href="favicon.ico" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- JS -->
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script>
+            $(function () {
+                $("#headercontent").load("header.html");
+                $("#footercontent").load("footer.html");
+            });
+        </script>
+        <!-- BOOTSRAP -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <!-- HEADER -->
+        <div id="headercontent"></div>
+        <!-- BODY -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <ol class="breadcrumb" id="breadcrumbs">
+                    <li><a href="index.html">Kezdőlap</a></li>
+                    <li class="active">Új bajnokság felvétele</li>
+                </ol>
+            </div>
+            <div class="panel-body title-body">
+                <h3 class="title">Új bajnokság felvétele</h3>
+            </div>
+            <div class="panel-body form-add-bg">
+                <!-- BODY CONTENT -->
+                <div class="form-group form-add-group">
+                    <form id="sport-add-form">
+                        <label for="usr">Bajnokság megnevezése:</label>
+                        <input type="text" class="form-control form-add" name='name' placeholder="pl.: Labdarúgó-világbajnokság"><br>
+                        <label for="usr">Leírás:</label>
+                        <input type="text" class="form-control form-add" name='description' placeholder="további információ"><br>
+                        <label for="usr">Kezdés dátuma:</label>
+                        <input type="text" class="form-control form-add" name='startDate' placeholder="pl.: 2017.01.01"><br>
+                        <label for="usr">Befejezés dátuma:</label>
+                        <input type="text" class="form-control form-add" name='endDate' placeholder="pl.: 2017.02.01"><br>
+                    </form>
+                    <div class="panel panel-default panel-form">
+                        <form id="se-radios">
+                            <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                                <image class="loading-img" xlink:href="loading.svg" />
+                            </svg>
+                        </form>
+                    </div>
+                    <div class="panel panel-default panel-form">
+                        <form id="ss-radios">
+                            <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                                <image class="loading-img" xlink:href="loading.svg" />
+                            </svg>
+                        </form>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-add" onclick="onSaveChampionship()">Hozzáad</button>
+                </div>
+            </div>
+            <!-- FOOTER -->
+            <div id="footercontent"></div>
+        </div>
+    </body>
+</html>

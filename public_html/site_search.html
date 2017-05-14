@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SportOnline</title>
+        <link rel="icon" href="favicon.ico" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- JS -->
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script>
+            $(function () {
+                $("#headercontent").load("header.html");
+                $("#footercontent").load("footer.html");
+            });
+        </script>
+        <!-- BOOTSRAP -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script src="script_search.js"></script>
+    </head>
+    <body>
+        <!-- HEADER -->
+        <div id="headercontent"></div>
+        <!-- BODY -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <ol class="breadcrumb" id="breadcrumbs">
+                    <li><a href="index.html">Kezdőlap</a></li>
+                    <li class="active">Keresési találatok</li>
+                </ol>
+            </div>
+            <div class="panel-body">
+                <!-- BODY CONTENT -->
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <!-- Table -->
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Bajnokságok</th>
+                                <th>Megtekintés</th>
+                            </tr>
+                        </thead>
+                        <tbody id="search-list-ch">
+                            <tr>
+                                <th>
+                                    <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                                        <image class="loading-img" xlink:href="searching.svg" />
+                                    </svg>
+                                </th>
+                                <th></th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <!-- Table -->
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Szériák</th>
+                                <th>Megtekintés</th>
+                            </tr>
+                        </thead>
+                        <tbody id="search-list-se">
+                            <tr>
+                                <th>
+                                    <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                                        <image class="loading-img" xlink:href="searching.svg" />
+                                    </svg>
+                                </th>
+                                <th></th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- FOOTER -->
+            <div id="footercontent"></div>
+        </div>
+    </body>
+</html>

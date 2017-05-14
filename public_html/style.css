@@ -1,0 +1,194 @@
+body {
+    background-color: #1d3760;
+}
+
+.panel {
+    margin: 10px 20px 10px 20px;
+    border: 0px;
+}
+.panel-body {
+    padding: 0px 10px 0px 10px;
+}
+
+.site-icon-pos {
+    padding-top: 10px;
+}
+
+.site-icon {
+    animation: logoAnimation 4s infinite ease-in-out;
+}
+
+.header-list-btn {
+    padding-left: 10px;
+    margin-left: 10px;
+}
+
+@keyframes logoAnimation {
+    0% { transform: rotate(10deg) scale(1.0); }
+    25% { transform: rotate(0deg) scale(1.2); }
+    50% { transform: rotate(-10deg) scale(1.0); }
+    75% { transform: rotate(0deg) scale(1.2); }
+    100% { transform: rotate(10deg) scale(1.0); }
+}
+
+.header-list-btn {
+    margin-left: 10px;
+}
+
+.site-title {
+    padding-right: 40px;
+}
+
+.breadcrumb {
+    background-color: transparent;
+    margin-top: 20px;
+    margin-bottom: 0px;
+}
+
+.banner-img {
+    width: 100%;
+}
+
+.glyphicon {
+    margin-right: 10px;
+}
+
+.searchresult-text {
+    color: #0058ff;
+    background-color: #cedfff;
+}
+
+.specs-title {
+    color: black;
+    font-size: 20px;
+}
+
+.btn:hover {
+    box-shadow: 0px 0px 20px 0px rgba(0,140,255,0.5);
+}
+
+.table {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+tbody > tr {
+    background-color: #eaf1ff;
+    opacity: 0;
+    animation: tableRowFadeInAnimation 0.75s forwards 1;
+}
+
+@keyframes tableRowFadeInAnimation {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+thead {
+    background-color: #3770d7;
+    color: white;
+}
+
+.table > tbody > tr > td,
+.table > tbody > tr > th,
+.table > tfoot > tr > td,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > thead > tr > th {
+    border-color: white;
+    border-width: 0px;
+}
+
+tbody > tr:hover {
+    background-color: #d9e4f9;
+}
+
+.login-dropdown {
+    color: #3770d7;
+}
+
+#adm-title {
+    margin: 10px;
+}
+
+.form-login {
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 0px;
+    margin-bottom: 6px;
+}
+
+.btn-login {
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 6px;
+}
+
+.adm-list-btn {
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-bottom: 6px;
+    width: 160px;
+}
+
+.form-add-bg {
+    background: linear-gradient(to bottom, #ffffff , #a6b1c1);
+}
+
+.form-add-group {
+    margin: auto;
+    width: 50%;
+    padding: 20px;
+}
+
+.form-add {
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.btn-add {
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    width: 200px;
+}
+
+.title-body {
+    background: linear-gradient(to right, #3770d7 , #a6b1c1);
+    background-color: #3770d7;
+}
+
+.title {
+    color: white;
+    transform: translate(10px);
+    animation: titleAnimation 1s 1 ease-out;
+}
+
+@keyframes titleAnimation {
+    from { transform: translate(40px); }
+    to   { transform: translate(10px); }
+}
+
+.panel-form {
+    margin-left: 0px;
+    padding: 10px;
+    width: 604px;
+}
+
+.panel-form-small {
+    margin-top: 0px;
+    padding: 10px;
+    width: 302px;
+}
+
+.panel-form-parent {
+    display: flex;
+}
+
+.loading-img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

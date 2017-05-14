@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+    <head>
+<script>
+    var post = "";
+    var post_ss_save = "season/save";
+
+    var r_ss_save = new XMLHttpRequest();
+
+    function read_IP() {
+        var cookies = document.cookie;
+        var idx = cookies.indexOf("restip=");
+        if (idx > -1) {
+            var ip = "";
+            var cookiesraw = cookies.split(';');
+            for (i in cookiesraw) {
+                var data = cookiesraw[i].split('=');
+                if (data[0] == "restip") {
+                    ip = data[1];
+                    break;
+                }
+            }
+            post = "http://" + ip + ":8080/sport/rest/";
+        } else {
+            var ip = prompt("Írd be a REST API IP címét (port nélkül): ", '');
+            var error = false;
+            var segments = ip.split(".");
+
+            var chksum = 0;
+            for (i in segments) { chksum += parseInt(segments[i]); }
+            if (chksum !== 704) { error = true; }
+
+            if (error === false) {
+                document.cookie = "restip=" + ip;
+                post = "http://" + ip + ":8080/sport/rest/";
+            } else {
+                readIP();
+            }
+        }
+    }
+
+    function rPost_ss_save() {
+        var form = document.getElementById("sport-add-form");
+        form.name.value = "";
+        var msg = JSON.parse(r_ss_save.responseText);
+        window.alert("Új évad felvétele:\n " + msg.message);
+    }
+    
+    function makeBaseAuth(usern, passwd) {
+      var temp = usern + ':' + passwd;
+      var hash = btoa(temp);
+      return "Basic " + hash;
+    }
+    
+    function onSaveSeason() {
+        var form = document.getElementById("sport-add-form");
+        var cookies = document.cookie;
+        
+        if (form.name.value == "") {
+            window.alert("Hiba: Nem adtad meg az évadot!");
+            return false;
+        }
+        var params = '{ "name": "' + form.name.value + '", "description": "" }';
+        read_IP();
+        
+        var username;
+        var cookiesraw = cookies.split('; ');
+        for (i in cookiesraw) {
+            var data = cookiesraw[i].split('=');
+            if (data[0] == "usern") {
+                username = data[1];
+                break;
+            }
+        }
+        var passwd;
+        for (i in cookiesraw) {
+            var data = cookiesraw[i].split('=');
+            if (data[0] == "passwd") {
+                passwd = data[1];
+                break;
+            }
+        }
+        
+        r_ss_save.open('POST', post + post_ss_save, true);
+        r_ss_save.setRequestHeader("Content-type", 'application/json; charset=UTF-8');
+        
+        var auth = makeBaseAuth(username, passwd);
+        r_ss_save.setRequestHeader('Authorization', auth);
+        
+        r_ss_save.withCredentials = false;
+        
+        r_ss_save.addEventListener('load', rPost_ss_save);
+        r_ss_save.send(params);
+        
+        return false;
+    }
+</script>
+        <title>SportOnline</title>
+        <link rel="icon" href="favicon.ico" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- JS -->
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script>
+            $(function () {
+                $("#headercontent").load("header.html");
+                $("#footercontent").load("footer.html");
+            });
+        </script>
+        <!-- BOOTSRAP -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <!-- HEADER -->
+        <div id="headercontent"></div>
+        <!-- BODY -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <ol class="breadcrumb" id="breadcrumbs">
+                    <li><a href="index.html">Kezdőlap</a></li>
+                    <li class="active">Új széria felvétele</li>
+                </ol>
+            </div>
+            <div class="panel-body title-body">
+                <h3 class="title">Új széria felvétele</h3>
+            </div>
+            <div class="panel-body form-add-bg">
+                <!-- BODY CONTENT -->
+                <div class="form-group form-add-group">
+                    <form id="sport-add-form">
+                        <label for="usr">Évad:</label>
+                        <input type="text" class="form-control form-add" name='name' placeholder="pl.: 2016"><br>
+                    </form>
+                    <button type="submit" class="btn btn-success btn-add" onclick="onSaveSeason()">Hozzáad</button>
+                </div>
+            </div>
+            <!-- FOOTER -->
+            <div id="footercontent"></div>
+        </div>
+    </body>
+</html>

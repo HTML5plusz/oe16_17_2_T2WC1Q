@@ -1,0 +1,224 @@
+<script>
+    var get = "";
+    var get_ch_idname = "championship/idname/all";
+    var get_se_idname = "seria/idname/all";
+
+    var r_h_ch = new XMLHttpRequest();
+    var r_h_se = new XMLHttpRequest();
+    
+    function readIP() {
+        var cookies = document.cookie;
+        var idx = cookies.indexOf("restip=");
+        if (idx > -1) {
+            var ip = "";
+            var cookiesraw = cookies.split(';');
+            for (i in cookiesraw) {
+                var data = cookiesraw[i].split('=');
+                if (data[0] == "restip") {
+                    ip = data[1];
+                    break;
+                }
+            }
+            get = "http://" + ip + ":8080/sport/rest/";
+        } else {
+            var ip = prompt("Írd be a REST API IP címét (port nélkül): ", '');
+            var error = false;
+            var segments = ip.split(".");
+            
+            var chksum = 0;
+            for (i in segments) { chksum += parseInt(segments[i]); }
+            if (chksum !== 704) { error = true; }
+            console.log(chksum);
+            
+            if (error === false) {
+                document.cookie = "restip=" + ip;
+                get = "http://" + ip + ":8080/sport/rest/";
+            } else {
+                readIP();
+            }
+        }
+    }
+    
+    function rGet_ch() {
+        var championships = JSON.parse(r_h_ch.responseText);
+        var listElement = document.getElementById("championships");
+        listElement.innerHTML = "";
+        listElement.innerHTML += '<a href="site_championships.html" class="btn btn-primary header-list-btn" role="button">Az összes bajnokság</a>';
+        listElement.innerHTML += '<li role="separator" class="divider"></li>';
+        
+        for (i in championships) {
+            listElement.innerHTML += '<li><a href="site_championship.html?id=' + championships[i].id + '">' + championships[i].name + '</a></li>\n';
+        }
+    }
+    
+    function rGet_se() {
+        var series = JSON.parse(r_h_se.responseText);
+        var listElement = document.getElementById("series");
+        listElement.innerHTML = "";
+        listElement.innerHTML += '<a href="site_series.html" class="btn btn-primary header-list-btn" role="button">Az összes széria</a>';
+        listElement.innerHTML += '<li role="separator" class="divider"></li>';
+        
+        for (i in series) {
+            listElement.innerHTML += '<li><a href="site_seria.html?id=' + series[i].id + '">' + series[i].name + '</a></li>\n';
+        }
+    }
+
+    function admPanelInit() {
+        var parent = document.getElementById("login");
+        
+        var cookies = document.cookie;
+        var idx = cookies.indexOf("usern=");
+        if (idx > -1) {
+            var username;
+            var cookiesraw = cookies.split('; ');
+            for (i in cookiesraw) {
+                var data = cookiesraw[i].split('=');
+                if (data[0] == "usern") {
+                    username = data[1];
+                    break;
+                }
+            }
+            var title = document.createElement("li");
+            title.setAttribute("id", "adm-title");
+            title.innerHTML = "Bejelentkezve: " + username;
+            parent.appendChild(title);
+            
+            var separator = document.createElement("li");
+            separator.setAttribute("role", "separator");
+            separator.setAttribute("class", "divider");
+            parent.appendChild(separator);
+            
+            parent.innerHTML += '<a href="site_add_sport.html" class="btn btn-default adm-list-btn" role="button">Sport felvétel</a><br>';
+            parent.innerHTML += '<a href="site_add_championship.html" class="btn btn-default adm-list-btn" role="button">Bajnokság felvétel</a><br>';
+            parent.innerHTML += '<a href="site_add_event.html" class="btn btn-default adm-list-btn" role="button">Esemény felvétel</a><br>';
+            parent.innerHTML += '<a href="site_add_seria.html" class="btn btn-default adm-list-btn" role="button">Széria felvétel</a><br>';
+            parent.innerHTML += '<a href="site_add_season.html" class="btn btn-default adm-list-btn" role="button">Szezon felvétel</a><br>';
+            
+            var logout = document.createElement("li");
+            logout.innerHTML = '<div class="panel-footer"><button type="button" class="btn btn-primary" onclick="OnLogout()">Kijelentkezés</button></div>';
+            parent.appendChild(logout);
+            
+        } else {
+            var title = document.createElement("li");
+            title.setAttribute("id", "adm-title");
+            title.innerHTML = "Nincs bejelentkezve.";
+            parent.appendChild(title);
+            
+            var login = document.createElement("li");
+            login.setAttribute("id", "adm-login");
+            login.innerHTML = '<div class="form-group form-login"><input type="text" class="form-control" placeholder="Felhasználónév" id="loginusername"></div>';
+            login.innerHTML += '<div class="form-group form-login"><input type="password" class="form-control" placeholder="Jelszó" id="loginpasswd"></div>';
+            login.innerHTML += '<button type="button" class="btn btn-primary btn-login" onclick="loginCheck()">Bejelentkezés</button>';
+            parent.appendChild(login);
+        }
+    }
+
+    readIP();
+    
+    // get championship list:    
+    r_h_ch.addEventListener('load', rGet_ch);
+    r_h_ch.open("GET", get + get_ch_idname, true);
+    r_h_ch.send();
+    
+    // get championship list:
+    r_h_se.addEventListener('load', rGet_se);
+    r_h_se.open("GET", get + get_se_idname, true);
+    r_h_se.send();
+    
+    admPanelInit();
+    
+</script>
+<script>
+    function loginCheck() {
+        var form_parent = document.getElementById("login");
+        var form_title = document.getElementById("adm-title");
+        var form = document.getElementById("adm-login");
+            
+        var username = "";
+        var passwd = "";
+        var cookies = document.cookie;
+        var idx = cookies.indexOf("usern=");
+        if (idx > -1) {
+            
+        } else {
+            username = document.getElementById("loginusername").value;
+            passwd = document.getElementById("loginpasswd").value;
+            var invalid = false;
+            
+            var chksum = 0;
+            for (i in username) { chksum += username.charCodeAt(i); }
+            if (chksum !== 731) { invalid = true; }
+            
+            chksum = 0;
+            for (i in passwd) { chksum += passwd.charCodeAt(i); }
+            if (chksum !== 521) { invalid = true; }
+            
+            if (invalid) {
+                window.alert("Hibás felhasználónév vagy jelszó.");
+            } else {
+                document.cookie = "usern=" + username;
+                document.cookie = "passwd=" + passwd;
+                location.reload();
+            }
+        }
+    }
+    
+    function OnLogout() {
+        document.cookie = 'usern=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = 'passwd=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        location.reload();
+    }
+</script>
+<!-- HEADER MENU -->
+<div class="panel panel-default">
+    <div class="panel-body">
+
+        <a class="navbar-brand site-icon-pos" href="index.html">
+            <img class="site-icon" src="icon.png">
+        </a>
+
+        <div class="navbar-brand site-title">SportOnline</div>
+
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Bajnokságok <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" id="championships">
+                <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                    <image class="loading-img" xlink:href="loading.svg" />
+                </svg>
+            </ul>
+        </div>
+
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Szériák <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" id="series">
+                <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                    <image class="loading-img" xlink:href="loading.svg" />
+                </svg>
+            </ul>
+        </div>
+
+        <a href="site_sports.html" class="btn btn-default navbar-btn" role="button">Sportágak</a>
+        
+        <!-- LOGIN -->
+        <div class="btn-group">
+            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Adminisztráció <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu login-dropdown" id="login">
+                
+            </ul>
+        </div>
+        
+        <!-- SEARCH -->
+        <form class="navbar-form navbar-right" role="search" action="site_search.html">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Sportágak, események..." name="searchtext" id="searchbox">
+            </div>
+            <button type="submit" class="btn btn-default">Keresés</button>
+        </form>
+    </div>
+</div>

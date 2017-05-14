@@ -1,0 +1,15 @@
+.sp-panel {
+    margin: 0px;
+    opacity: 0;
+    animation: spPanelFadeInAnimation 1s forwards 1;
+}
+
+.sp-specs-item {
+    opacity: 0;
+    animation: spPanelFadeInAnimation 0.75s forwards 1;
+}
+
+@keyframes spPanelFadeInAnimation {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

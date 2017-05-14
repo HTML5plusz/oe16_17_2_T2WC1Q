@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+    <head>
+<script>
+    var get = "";
+    var post_ev_save = "championship/addsport";
+    var get_ch_idname = "championship/idname/all";
+    var get_sp_idname = "sport/idname/all";
+    
+    var r_ev_save = new XMLHttpRequest();
+    var r_ch_idname = new XMLHttpRequest();
+    var r_sp_idname = new XMLHttpRequest();
+    
+    function readIP() {
+        var cookies = document.cookie;
+        var idx = cookies.indexOf("restip=");
+        if (idx > -1) {
+            var ip = "";
+            var cookiesraw = cookies.split(';');
+            for (i in cookiesraw) {
+                var data = cookiesraw[i].split('=');
+                if (data[0] == "restip") {
+                    ip = data[1];
+                    break;
+                }
+            }
+            get = "http://" + ip + ":8080/sport/rest/";
+        } else {
+            var ip = prompt("Írd be a REST API IP címét (port nélkül): ", '');
+            var error = false;
+            var segments = ip.split(".");
+
+            var chksum = 0;
+            for (i in segments) { chksum += parseInt(segments[i]); }
+            if (chksum !== 704) { error = true; }
+
+            if (error === false) {
+                document.cookie = "restip=" + ip;
+                get = "http://" + ip + ":8080/sport/rest/";
+            } else {
+                readIP();
+            }
+        }
+    }
+    
+    function rGet_ch_get() {
+        var ch_all = JSON.parse(r_ch_idname.responseText);
+        var form = document.getElementById("ch-radios");
+        form.innerHTML = '<label for="usr">Bajnokság kiválasztása:</label>' + '<br>\n';
+        form.innerHTML += '<label for="usr"><small>Amihez felvesszük az eseményt.</small></label>';
+        
+        for (var i = 0; i < ch_all.length; i++) {
+            form.innerHTML += "\n" + '<div class="radio"><label><input type="radio" name="ch" class="custom-control-input" value="' + ch_all[i].id + '">' + ch_all[i].name + '</label></div>'
+        }
+    }
+    
+    function rGet_sp_get() {
+        var sp_all = JSON.parse(r_sp_idname.responseText);
+        var form = document.getElementById("sp-radios");
+        form.innerHTML = '<label for="usr">Sportesemény kiválasztása</label>' + '<br>\n';
+        form.innerHTML += '<label for="usr"><small>Amit hozzáadunk a bajnoksághoz.</small></label>';
+        
+        for (var i = 0; i < sp_all.length; i++) {
+            form.innerHTML += "\n" + '<div class="radio"><label><input type="radio" name="sp" class="custom-control-input" value="' + sp_all[i].id + '">' + sp_all[i].name + '</label></div>'
+        }
+    }
+    
+    window.onload = function() {
+        readIP();
+        
+        r_ch_idname.addEventListener('load', rGet_ch_get);
+        r_ch_idname.open("GET", get + get_ch_idname, true);
+        r_ch_idname.send();
+        
+        r_sp_idname.addEventListener('load', rGet_sp_get);
+        r_sp_idname.open("GET", get + get_sp_idname, true);
+        r_sp_idname.send();
+    };
+
+    function rPost_ev_save() {       
+        var ch_radios = document.getElementsByName("ch");
+        for (var i = 0; i < ch_radios.length; i++) {
+            ch_radios[i].checked = false;
+            ch_radios[i].disabled = false;
+        }
+        
+        var sp_radios = document.getElementsByName("sp");
+        for (var i = 0; i < sp_radios.length; i++) {
+            sp_radios[i].checked = false;
+            sp_radios[i].disabled = false;
+        }
+        
+        var msg = JSON.parse(r_ev_save.responseText);
+        window.alert("Új esemény felvétele:\n " + msg.message);
+    }
+
+    function makeBaseAuth(usern, passwd) {
+      var temp = usern + ':' + passwd;
+      var hash = btoa(temp);
+      return "Basic " + hash;
+    }
+    
+    function onSaveChampionship() {
+        var form = document.getElementById("sport-add-form");
+        var cookies = document.cookie;
+
+        var username;
+        var cookiesraw = cookies.split('; ');
+        for (i in cookiesraw) {
+            var data = cookiesraw[i].split('=');
+            if (data[0] == "usern") {
+                username = data[1];
+                break;
+            }
+        }
+        var passwd;
+        for (i in cookiesraw) {
+            var data = cookiesraw[i].split('=');
+            if (data[0] == "passwd") {
+                passwd = data[1];
+                break;
+            }
+        }
+        var auth = makeBaseAuth(username, passwd);
+
+        var chid = -1;
+        var ch_radios = document.getElementsByName("ch");
+        for (var i = 0; i < ch_radios.length; i++)
+            if (ch_radios[i].checked)
+                chid = ch_radios[i].value;
+        
+        var sportid = -1;
+        var sp_radios = document.getElementsByName("sp");
+        for (var i = 0; i < sp_radios.length; i++)
+            if (sp_radios[i].checked)
+                sportid = sp_radios[i].value;
+        
+        readIP();
+        var params = '{ "championshipid": ' + chid + ', "sportid": ' + sportid + ', "specializationid": [0], "conditionid": [0] }';
+        
+        r_ev_save.open('POST', get + post_ev_save, true);
+        r_ev_save.setRequestHeader("Content-type", 'application/json; charset=UTF-8');
+        r_ev_save.setRequestHeader('Authorization', auth);
+        r_ev_save.withCredentials = false;
+        r_ev_save.addEventListener('load', rPost_ev_save);
+        r_ev_save.send(params);
+        
+        return false;
+    }
+</script>
+        <title>SportOnline</title>
+        <link rel="icon" href="favicon.ico" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- JS -->
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script>
+            $(function () {
+                $("#headercontent").load("header.html");
+                $("#footercontent").load("footer.html");
+            });
+        </script>
+        <!-- BOOTSRAP -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <!-- HEADER -->
+        <div id="headercontent"></div>
+        <!-- BODY -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <ol class="breadcrumb" id="breadcrumbs">
+                    <li><a href="index.html">Kezdőlap</a></li>
+                    <li class="active">Új bajnokság felvétele</li>
+                </ol>
+            </div>
+            <div class="panel-body title-body">
+                <h3 class="title">Új bajnokság felvétele</h3>
+            </div>
+            <div class="panel-body form-add-bg">
+                <!-- BODY CONTENT -->
+                <div class="form-group form-add-group">
+                    <div class="panel-form-parent">
+                        <div class="panel panel-default panel-form-small">
+                            <form id="ch-radios">
+                                <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                                    <image class="loading-img" xlink:href="loading.svg" />
+                                </svg>
+                            </form>
+                        </div>
+                        <div class="panel panel-default panel-form-small">
+                            <form id="sp-radios">
+                                <svg height="100" width="100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                                    <image class="loading-img" xlink:href="loading.svg" />
+                                </svg>
+                            </form>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-add" onclick="onSaveChampionship()">Hozzáad</button>
+                </div>
+            </div>
+            <!-- FOOTER -->
+            <div id="footercontent"></div>
+        </div>
+    </body>
+</html>

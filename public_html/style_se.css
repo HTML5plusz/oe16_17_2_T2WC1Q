@@ -1,0 +1,22 @@
+.se-title-body {
+    background: linear-gradient(to right, #3770d7 , #a6b1c1);
+    background-color: #3770d7;
+}
+
+.se-title {
+    color: white;
+    transform: translate(10px);
+    animation: seTitleAnimation 1s 1 ease-out;
+}
+
+.se-desc {
+    color: white;
+    font-size: 20px;
+    transform: translate(10px);
+    animation: seTitleAnimation 2s 1 ease-out;
+}
+
+@keyframes seTitleAnimation {
+    from { transform: translate(40px); }
+    to   { transform: translate(10px); }
+}
